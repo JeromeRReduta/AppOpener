@@ -1,4 +1,4 @@
-from data.AppData import AppData
+from data.app_data import App_Data
 
 class CSV_Reader_To_App_Data:
     
@@ -14,4 +14,4 @@ class CSV_Reader_To_App_Data:
             if (url == '' or url == None):
                 continue
             urls.append(csv_reader_output[i])
-        return AppData(path, urls)  
+        return App_Data(path, urls)  

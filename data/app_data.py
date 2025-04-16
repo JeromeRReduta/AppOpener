@@ -1,8 +1,7 @@
 from typing import final
-from abc import ABC, abstractmethod
 
 @final
-class AppData:
+class App_Data:
     
     def __init__(self, path: str, urls: list[str]):
         self.__path = path
@@ -15,4 +14,3 @@ class AppData:
     @property
     def urls(self):
         return self.__urls
-    
