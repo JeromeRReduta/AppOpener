@@ -1,18 +1,4 @@
-from pywinauto.application import Application
-import csv
-from factories.csv_reader_to_app_data import CSV_Reader_To_App_Data
-from argparse import ArgumentParser
 import app_openers as util
-
-description = """An app that opens up a list of files in a CSV, alongside any URLS.
-
-                 For example, this app can open several Chrome tabs at given links."""
-
-def get_csv_path():
-
-    parser = ArgumentParser(description=description)
-    parser.add_argument("csv_path")
-    return parser.parse_args().csv_path
 
 def main():
     try:
@@ -29,4 +15,3 @@ def main():
         
 if __name__ == "__main__":
     main()
-    

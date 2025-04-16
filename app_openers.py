@@ -1,13 +1,7 @@
 from pywinauto.application import Application
 import csv
-from factories.csv_reader_to_app_data import CSV_Reader_To_App_Data
 from argparse import ArgumentParser
-from itertools import starmap
 import os
-import subprocess
-
-# TODO: Bug - doesn't open up files w/o any urls, e.g. Spotify or OBS
-
 
 description = """An app that opens up a list of files in a CSV, alongside any URLS.
 
@@ -21,8 +15,7 @@ def get_csv_path():
 def convert_file_to_commands(csv_file):
     values = csv.reader(csv_file) 
     next(values, None) # skips headers
-    temp = [convert_row_to_commands(row) for row in values]
-    return temp
+    return [convert_row_to_commands(row) for row in values]
 
 def convert_row_to_commands(row):
     commands = []
