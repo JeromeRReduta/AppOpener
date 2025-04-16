@@ -1,16 +1,6 @@
 from pywinauto.application import Application
 import csv
-from argparse import ArgumentParser
 import os
-
-description = """An app that opens up a list of files in a CSV, alongside any URLS.
-
-                 For example, this app can open several Chrome tabs at given links."""
-
-def get_csv_path():
-    parser = ArgumentParser(description=description)
-    parser.add_argument("csv_path")
-    return parser.parse_args().csv_path
 
 def convert_file_to_commands(csv_file):
     values = csv.reader(csv_file) 

@@ -1,14 +1,27 @@
 import app_openers as util
+from argparse import ArgumentParser
+
+description = """An app that opens up a list of files in a CSV, alongside any URLS.
+
+                 For example, this app can open several Chrome tabs at given links."""
+
+def get_csv_path():
+    parser = ArgumentParser(description=description)
+    parser.add_argument("csv_path")
+    return parser.parse_args().csv_path
+
+def open_all_apps(csv_path):
+    print("Reading file: {}...".format(csv_path))
+    with open(csv_path, mode="r") as file:
+        print("Opening apps...")
+        commands = util.convert_file_to_commands(file)
+        util.open_all_sites(commands)
 
 def main():
     try:
-        csv_path = util.get_csv_path()
-        print("Reading file: {}...".format(csv_path))
-        with open(csv_path, mode="r") as file:
-            print("Opening apps...")
-            commands = util.convert_file_to_commands(file)
-            util.open_all_sites(commands)
-            print("Program finished")
+        csv_path = get_csv_path()
+        open_all_apps(csv_path)
+        print("Program finished")
         
     except Exception as e:
         print("Oh my god its on fire {}\n".format(e))
