@@ -8,6 +8,7 @@ description = """An app that opens up a list of files in a CSV, alongside any UR
                  For example, this app can open several Chrome tabs at given links."""
 
 def get_csv_path():
+
     parser = ArgumentParser(description=description)
     parser.add_argument("csv_path")
     return parser.parse_args().csv_path
@@ -15,7 +16,7 @@ def get_csv_path():
 class AppOpener:
         
     def __init__(self, file):        
-        values = csv.reader(file)
+        values = csv.reader(file) 
         next(values, None) # skips headers
         self.__data_set = {CSV_Reader_To_App_Data.convert(row) for row in values}
             
