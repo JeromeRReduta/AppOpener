@@ -10,8 +10,6 @@
 from pywinauto.application import Application
 import csv
 import os
-    
-
 
 def convert_file_to_commands(csv_file):
     """Converts all values in a csv file into command-line arguments
