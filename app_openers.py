@@ -10,9 +10,12 @@
 from pywinauto.application import Application
 import csv
 import os
+import re
 
-def convert_file_to_commands(csv_file):
-    """Converts all values in a csv file into command-line arguments
+def convert_file_to_command_block(csv_file):
+    """Converts all values in a csv file into a block of command-line arguments that generally looks like this:
+    
+    [   ["exe0 a", "exe0 b", exe1 c"...], ["exe1 g", "exe1 h"], ["exe2"] ]
 
     Args:
         csv_file (str): path to csv
@@ -24,11 +27,10 @@ def convert_file_to_commands(csv_file):
     values = csv.reader(csv_file) 
     next(values, None) # skips headers
     return [convert_row_to_commands(row) for row in values]
+    
 
 def convert_row_to_commands(row):
     """Converts one row in the csv to a list of command-line arguments\
-    
-    WARNING: Not having an app name in the CSV is a FATAL ERROR. If this happens, the program will EXIT.
 
     Args:
         row (list[str]): one row from a csv.reader iterable
@@ -37,10 +39,11 @@ def convert_row_to_commands(row):
         list[str]: a list of command-line arguments, i.e. ["name url", "name url1," "name url2,"...]
                    if no urls were given, simply returns the name as a command-line argument
     """
+    is_executable = bool(re.search(".exe$", row[0], re.IGNORECASE))
+    if row[0] is None or not is_executable:
+        print(f"\033[91mError - cannot process executable path {row[0]}\033[0m")
+        return []
     commands = []
-    if row[0] is None or row[0].strip == "":
-        print("ERROR - NO PROGRAM NAME LISTED")
-        exit(-1)
     name = row[0].strip()
     for i in range(1, len(row)):
         if row[i] is None or row[i].strip() == "":
@@ -58,11 +61,12 @@ def open_all_sites(commands):
     """
     for command in commands:
         for line in command:
-            if line.find("obs64") != -1:
-                print("We found an obs bois" + line)
+            is_obs = line.find("obs64") != -1
+            if is_obs:
                 open_obs(line)
             else:
                 Application(backend="uia").start(line)
+                continue
             
 def open_obs(line):
     """opens obs
