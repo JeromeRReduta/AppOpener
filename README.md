@@ -4,7 +4,9 @@ An automation script. Given a specially-formatted CSV, opens a list of executabl
 
 For example:
 
-`py ./app_opener.py example.csv`
+```
+py ./app_opener.py example.csv
+```
 
 is the equivalent of running the following in a terminal:
 
@@ -32,9 +34,11 @@ To run this app, you'll need to do 3 things:
 
 # Dependencies
 
-The only non-standard-library dependency used is pywinauto. Download instructions [are provided on their website](https://pywinauto.readthedocs.io/en/latest/index.html).
+```
+pip install -r .\requirements.txt
+```
 
-You'll also need Python, but by installing pywinauto you should need to install it anyway.
+For manual download, install pywinauto. Instructions [are provided on their website](https://pywinauto.readthedocs.io/en/latest/index.html).
 
 # Formatting your CSV
 
@@ -47,14 +51,15 @@ Check [example.csv](/example.csv) for reference. As a summary, the following thi
 
 # Running the file
 
-Once you've finished setting up, navigate to your cloned repo and run the following:
-`C:\Users\Whatever\AppOpener>py ./app_opener.py (csv_file_path)`
+```
+py ./app_opener.py (csv_file_path)
+```
 
 Replace `(csv_file_path)` with your path to your csv
 
-You can also run:
+More instructions:
 
 ```
-C:\Users\Whatever\AppOpener>py ./app_opener -h
-C:\Users\Whatever\AppOpener>py ./app_opener --help
+py ./app_opener -h
+py ./app_opener --help
 ```
