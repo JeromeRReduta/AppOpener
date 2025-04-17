@@ -63,3 +63,7 @@ More instructions:
 py ./app_opener -h
 py ./app_opener --help
 ```
+
+# Permissions
+
+Don't use this for malware/ad-ware. Only install on your own machine. Otherwise go wild.
