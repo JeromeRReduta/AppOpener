@@ -12,45 +12,44 @@ import csv
 import os
 import re
 
-def convert_file_to_command_block(csv_file):
-    """Converts all values in a csv file into a block of command-line arguments that generally looks like this:
+def convert_file_to_commands(csv_file, acc = []):
+    """Converts all values in a csv file into a list of command-line arguments
     
-    [   ["exe0 a", "exe0 b", exe1 c"...], ["exe1 g", "exe1 h"], ["exe2"] ]
-
     Args:
         csv_file (str): path to csv
-
-    Returns:
-        list[list[str]]: a nested list of command-line arguments # TODO: make this a flat list
+        acc (list, optional): stores generated command-line arguments. Used when parsing the whole file (see convert_file_to_commands) Defaults to [].
     """
     
     values = csv.reader(csv_file) 
     next(values, None) # skips headers
-    return [convert_row_to_commands(row) for row in values]
+    for row in values:
+        convert_row_to_commands(row, acc)
+
+def convert_row_to_commands(row, acc = []):
+    """Converts one row of values in a csv file into a list of command-line arguments. Arguments are appended to an accumulator for efficiency
     
-
-def convert_row_to_commands(row):
-    """Converts one row in the csv to a list of command-line arguments\
-
     Args:
-        row (list[str]): one row from a csv.reader iterable
-
-    Returns:
-        list[str]: a list of command-line arguments, i.e. ["name url", "name url1," "name url2,"...]
-                   if no urls were given, simply returns the name as a command-line argument
+        row (list[str]): the values in a given row of a csv file
+        acc (list, optional): stores generated command-line arguments. Used when parsing the whole file (see convert_file_to_commands) Defaults to [].
     """
+    
     is_executable = bool(re.search(".exe$", row[0], re.IGNORECASE))
     if row[0] is None or not is_executable:
-        print(f"\033[91mError - cannot process executable path {row[0]}\033[0m")
-        return []
-    commands = []
+        print(f"\033[91mError - cannot process executable path {row[0]}\033[0m") # Weird characters turn this error text red, then changes color back to white
+        return
+    has_added_anything = False
     name = row[0].strip()
     for i in range(1, len(row)):
-        if row[i] is None or row[i].strip() == "":
+        arg = row[i]
+        if arg is None:
             continue
-        arg = row[i].strip()
-        commands.append(r'{} "{}"'.format(name, arg)) # Terminal treats ' and " differently - we need ' on the outside or terminal doesn't recognize second line should be treated as one term
-    return commands if commands else [name]
+        arg = arg.strip()
+        if arg == "":
+            continue
+        acc.append(r'{} "{}"'.format(name, arg)) # Terminal treats ' and " differently - we need ' on the outside or terminal doesn't recognize second line should be treated as one term
+        has_added_anything = True
+    if not has_added_anything:
+        acc.append(name)
 
 def open_all_sites(commands):
     """Runs all given commands through the command line. In this context, it opens all sites
@@ -59,16 +58,15 @@ def open_all_sites(commands):
     Args:
         commands (list[str]): all command-line args
     """
+    
     for command in commands:
-        for line in command:
-            is_obs = line.find("obs64") != -1
-            if is_obs:
-                open_obs(line)
-            else:
-                Application(backend="uia").start(line)
-                continue
+        is_obs64 = command.find("obs64") != -1
+        if is_obs64:
+            open_obs64(command)
+        else:
+            Application(backend="uia").start(command)
             
-def open_obs(line):
+def open_obs64(line):
     """opens obs
         
         obs needs specific support because you have to start it from its directory or it won't work

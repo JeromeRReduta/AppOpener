@@ -30,7 +30,8 @@ def open_all_apps(csv_path):
     print("Reading file: {}...".format(csv_path))
     with open(csv_path, mode="r") as file:
         print("Opening apps...")
-        commands = util.convert_file_to_command_block(file)
+        commands = []
+        util.convert_file_to_commands(file, commands)
         util.open_all_sites(commands)
 
 def main():
