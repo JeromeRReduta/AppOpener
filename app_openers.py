@@ -16,7 +16,7 @@ import subprocess
 """ TODO:
 
 1. new docstrings
-2. new readme describing the change and telling ppl they can go to pywinauto branch if they want old functionality
+2. new readme describing the change and telling ppl they can go to pywinauto branch if they want old functionality and no more dependencies (beyond stdlib)
 3. clean up code
 4. push
 
