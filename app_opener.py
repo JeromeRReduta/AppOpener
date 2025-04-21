@@ -29,16 +29,16 @@ def open_all_apps(csv_path):
     
     print("Reading file: {}...".format(csv_path))
     with open(csv_path, mode="r") as file:
-        print("Opening apps...")
+        print("Reading files...")
         commands = []
         util.convert_file_to_commands(file, commands)
+        print("Opening apps...")
         util.open_all_sites(commands)
 
 def main():
     try:
         args = set_up_args()
         open_all_apps(args.csv_path)
-        print("Program finished")
         
     except Exception as e:
         print("Oh my god its on fire {}\n".format(e))

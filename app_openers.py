@@ -11,32 +11,51 @@ from pywinauto.application import Application
 import csv
 import os
 import re
+import subprocess
+
+""" TODO:
+
+1. new docstrings
+2. new readme describing the change and telling ppl they can go to pywinauto branch if they want old functionality
+3. clean up code
+4. push
+
+
+"""
+
+def print_err(message):
+    print(f"\033[91m{message}\033[0m")
 
 def convert_file_to_commands(csv_file, acc = []):
-    """Converts all values in a csv file into a list of command-line arguments
-    
-    Args:
-        csv_file (str): path to csv
-        acc (list, optional): stores generated command-line arguments. Used when parsing the whole file (see convert_file_to_commands) Defaults to [].
-    """
-    
+
     values = csv.reader(csv_file) 
     next(values, None) # skips headers
     for row in values:
         convert_row_to_commands(row, acc)
 
 def convert_row_to_commands(row, acc = []):
-    """Converts one row of values in a csv file into a list of command-line arguments. Arguments are appended to an accumulator for efficiency
-    
-    Args:
-        row (list[str]): the values in a given row of a csv file
-        acc (list, optional): stores generated command-line arguments. Used when parsing the whole file (see convert_file_to_commands) Defaults to [].
-    """
-    
-    is_executable = bool(re.search(".exe$", row[0], re.IGNORECASE))
-    if row[0] is None or not is_executable:
-        print(f"\033[91mError - cannot process executable path {row[0]}\033[0m") # Weird characters turn this error text red, then changes color back to white
+    name = row[0]
+    if name is None:
+        print_err("Error - no executable path given")
         return
+    is_executable = bool(re.search(".exe$", row[0], re.IGNORECASE))
+    if not is_executable:
+        print_err(f"Error: {name} is not an executable path")
+        return
+    name = name.strip()
+    is_obs64 = name.find("obs64") != -1
+    if is_obs64:
+        convert_obs64_to_commands(row, acc)
+        return
+    convert_exe_to_commands(row, acc)
+    
+def convert_obs64_to_commands(row, acc=[]):
+    name = row[0]
+    obs64_index = name.find("obs64")
+    dir, exe = name[0:obs64_index-1], name[obs64_index:]
+    acc.append(["START", "/D", dir, exe])
+
+def convert_exe_to_commands(row, acc=[]):
     has_added_anything = False
     name = row[0].strip()
     for i in range(1, len(row)):
@@ -46,34 +65,12 @@ def convert_row_to_commands(row, acc = []):
         arg = arg.strip()
         if arg == "":
             continue
-        acc.append(r'{} "{}"'.format(name, arg)) # Terminal treats ' and " differently - we need ' on the outside or terminal doesn't recognize second line should be treated as one term
+        acc.append([name, arg]) # Hey don't put ampersands in a url
         has_added_anything = True
     if not has_added_anything:
-        acc.append(name)
+        acc.append([name])
 
 def open_all_sites(commands):
-    """Runs all given commands through the command line. In this context, it opens all sites
-       in the CSV alongside its urls
-
-    Args:
-        commands (list[str]): all command-line args
-    """
-    
     for command in commands:
-        is_obs64 = command.find("obs64") != -1
-        if is_obs64:
-            open_obs64(command)
-        else:
-            Application(backend="uia").start(command)
-            
-def open_obs64(line):
-    """opens obs
-        
-        obs needs specific support because you have to start it from its directory or it won't work
-
-    Args:
-        line (str): command-line arg
-    """
-    obs64_index = line.find("obs64")
-    dir, exe = line[0:obs64_index], line[obs64_index:]
-    os.system(r'start /d "{}" {}'.format(dir, exe))
+        print(command)
+        subprocess.run(command, shell=True)
