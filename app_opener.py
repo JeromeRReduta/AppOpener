@@ -4,6 +4,7 @@
 
 import app_openers as util
 from argparse import ArgumentParser
+import subprocess
 
 description = """An app that opens up a list of files in a CSV, alongside any URLS.
 
@@ -33,7 +34,9 @@ def open_all_apps(csv_path):
         commands = []
         util.convert_file_to_commands(file, commands)
         print("Opening apps...")
-        util.open_all_sites(commands)
+        for command in commands:
+            print(command)
+            subprocess.run(command, shell=True)
 
 def main():
     try:
