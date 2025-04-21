@@ -26,19 +26,17 @@ exe2
 
 # Setup
 
-To run this app, you'll need to do 3 things:
+To run this app, you'll need to:
 
 1. Clone this repo.
-2. Download dependencies.
-3. Create a specially-formatted CSV
+2. Create a specially-formatted CSV
 
-# Dependencies
+# Dependencies (New!)
 
-```
-pip install -r .\requirements.txt
-```
+I've decided for now to use python's subprocess module instead of pywinauto, since it seems GUI automation is overkill for
+what is essentially opening a list of apps. This means that besides python, there are no dependencies.
 
-For manual download, install pywinauto. Instructions [are provided on their website](https://pywinauto.readthedocs.io/en/latest/index.html).
+If you prefer the old version with pywinauto, it is still supported in the pywinauto branch.
 
 # Formatting your CSV
 
@@ -48,6 +46,7 @@ Check [example.csv](/example.csv) for reference. As a summary, the following thi
 2. Executable files as the first entry in each row - this program WILL exit prematurely if the first entry is blank or not a .exe file
 3. If you have more than 1 url, it goes in a new cell/space to the RIGHT of the .exe file
 4. Absolute paths only please.
+5. No ampersands or anything that could cause a shell injection. IF YOU BREAK THIS RULE I AM NOT LIABLE.
 
 # Running the file
 
