@@ -1,42 +1,92 @@
 """Utility methods for app_opener
 
     Methods: 
-        * convert_file_to_commands(csv_file)
-        * convert_row_to_commands(row)
-        * open_all_sites(commands)
-        * open_obs(line)
+        * print_err(message)
+        * convert_file_to_commands(csv_file, acc)
+        * convert_row_to_commands(row, acc)
+        * convert_obs64_to_commands(row, acc)
+        * convert_exe_to_commands(row, acc)
 """
 
-from pywinauto.application import Application
 import csv
-import os
 import re
 
-def convert_file_to_commands(csv_file, acc = []):
-    """Converts all values in a csv file into a list of command-line arguments
-    
+""" TODO:
+
+1. new docstrings
+2. new readme describing the change and telling ppl they can go to pywinauto branch if they want old functionality and no more dependencies (beyond stdlib)
+3. clean up code
+4. push
+
+
+"""
+
+def print_err(message):
+    """Prints a message in red text to signify an error
+
     Args:
-        csv_file (str): path to csv
-        acc (list, optional): stores generated command-line arguments. Used when parsing the whole file (see convert_file_to_commands) Defaults to [].
+        message (str): The message
     """
     
+    print(f"\033[91m{message}\033[0m") # The 1st special char makes all text after it red. The 2nd special char resets the following text to white
+
+def convert_file_to_commands(csv_file, acc = []):
+    """converts the contents of a csv file to a list of commands for subprocess.run()
+
+    Args:
+        csv_file (str): path to csv file
+        acc (list, optional): Stores generated commands. Defaults to [].
+    """
+
     values = csv.reader(csv_file) 
     next(values, None) # skips headers
     for row in values:
         convert_row_to_commands(row, acc)
 
 def convert_row_to_commands(row, acc = []):
-    """Converts one row of values in a csv file into a list of command-line arguments. Arguments are appended to an accumulator for efficiency
+    """Converts the contents of one row of comma-separated values to a list of commands for subprocess.run
+
+    Args:
+        row (list[str]): row of comma-separated values
+        acc (list, optional): Stores generated commands. Defaults to [].
+    """
+    name = row[0]
+    if name is None:
+        print_err("Error - no executable path given")
+        return
+    is_executable = bool(re.search(".exe$", row[0], re.IGNORECASE))
+    if not is_executable:
+        print_err(f"Error: {name} is not an executable path")
+        return
+    name = name.strip()
+    is_obs64 = name.find("obs64") != -1
+    if is_obs64:
+        convert_obs64_to_commands(row, acc)
+        return
+    convert_exe_to_commands(row, acc)
+    
+def convert_obs64_to_commands(row, acc=[]):
+    """Special-case function for obs64, since for some reason it requires you to
+    run it from its directory
     
     Args:
-        row (list[str]): the values in a given row of a csv file
-        acc (list, optional): stores generated command-line arguments. Used when parsing the whole file (see convert_file_to_commands) Defaults to [].
+        row (list): comma-separated values (this must be the row corresponding to obs64)
+        
+        acc (list, optional): Stores commands. Defaults to [].
+    """
+    name = row[0]
+    obs64_index = name.find("obs64")
+    dir, exe = name[0:obs64_index-1], name[obs64_index:]
+    acc.append(["START", "/D", dir, exe])
+
+def convert_exe_to_commands(row, acc=[]):
+    """Converts an executable path (and any urls present) to commands
+
+    Args:
+        row (list[str]): comma-separated values
+        acc (list, optional): Stores commands. Defaults to [].
     """
     
-    is_executable = bool(re.search(".exe$", row[0], re.IGNORECASE))
-    if row[0] is None or not is_executable:
-        print(f"\033[91mError - cannot process executable path {row[0]}\033[0m") # Weird characters turn this error text red, then changes color back to white
-        return
     has_added_anything = False
     name = row[0].strip()
     for i in range(1, len(row)):
@@ -46,34 +96,7 @@ def convert_row_to_commands(row, acc = []):
         arg = arg.strip()
         if arg == "":
             continue
-        acc.append(r'{} "{}"'.format(name, arg)) # Terminal treats ' and " differently - we need ' on the outside or terminal doesn't recognize second line should be treated as one term
+        acc.append([name, arg]) # Hey don't put ampersands in a url
         has_added_anything = True
     if not has_added_anything:
-        acc.append(name)
-
-def open_all_sites(commands):
-    """Runs all given commands through the command line. In this context, it opens all sites
-       in the CSV alongside its urls
-
-    Args:
-        commands (list[str]): all command-line args
-    """
-    
-    for command in commands:
-        is_obs64 = command.find("obs64") != -1
-        if is_obs64:
-            open_obs64(command)
-        else:
-            Application(backend="uia").start(command)
-            
-def open_obs64(line):
-    """opens obs
-        
-        obs needs specific support because you have to start it from its directory or it won't work
-
-    Args:
-        line (str): command-line arg
-    """
-    obs64_index = line.find("obs64")
-    dir, exe = line[0:obs64_index], line[obs64_index:]
-    os.system(r'start /d "{}" {}'.format(dir, exe))
+        acc.append([name])
